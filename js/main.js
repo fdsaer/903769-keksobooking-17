@@ -13,45 +13,49 @@ var documentFragment = document.createDocumentFragment();
 var mapWidth = pinList.offsetWidth;
 var pinsData = [];
 
-var getRandom = function (arr) {
-  var randomItem = Math.floor(Math.random() * arr.length);
-  return arr[randomItem];
+var getRandom = function (list) {
+  var randomItem = Math.floor(Math.random() * list.length);
+  return list[randomItem];
 };
 
-var getPinsData = function () {
+var getPinData = function (serialNumber) {
+  var xPoint = Math.floor(Math.random() * mapWidth);
+  var yPoint = Math.floor(Math.random() * (MAP_HEIGHT_MAX - MAP_HEIGHT_MIN + 1) + MAP_HEIGHT_MIN);
+  return {
+    'author': {
+      'avatar': 'img/avatars/user0' + (serialNumber + 1) + '.png'
+    },
+    'offer': {
+      'type': getRandom(HOUSE_TYPE)
+    },
+    'location': {
+      'x': xPoint,
+      'y': yPoint
+    }
+  };
+};
+
+var collectPins = function () {
   var pinsAround = [];
   for (var i = 0; i < NUMBER_OF_PINS; i++) {
-    var xPoint = Math.floor(Math.random() * mapWidth);
-    var yPoint = Math.floor(Math.random() * (MAP_HEIGHT_MAX - MAP_HEIGHT_MIN + 1) + MAP_HEIGHT_MIN);
-    pinsAround[i] = {
-      'author': {
-        'avatar': 'img/avatars/user0' + (i + 1) + '.png'
-      },
-      'offer': {
-        'type': getRandom(HOUSE_TYPE)
-      },
-      'location': {
-        'x': xPoint,
-        'y': yPoint
-      }
-    };
+    pinsAround[i] = getPinData(i);
   }
   return pinsAround;
 };
 
-pinsData = getPinsData();
+pinsData = collectPins();
 
-var getPins = function (arr) {
+var createDomElement = function (objectData) {
   var mapPin = pinTemlate.cloneNode(true);
   var avatarImg = mapPin.querySelector('img');
-  mapPin.style = 'left: ' + (arr.location.x - PIN_WIDTH / 2) + 'px; top: ' + (arr.location.y - PIN_HEIGHT) + 'px;';
-  avatarImg.src = arr.author.avatar;
-  avatarImg.alt = arr.offer.type;
+  mapPin.style = 'left: ' + (objectData.location.x - PIN_WIDTH / 2) + 'px; top: ' + (objectData.location.y - PIN_HEIGHT) + 'px;';
+  avatarImg.src = objectData.author.avatar;
+  avatarImg.alt = objectData.offer.type;
   return mapPin;
 };
 
-for (var i = 0; i < NUMBER_OF_PINS; i++) {
-  documentFragment.appendChild(getPins(pinsData[i]));
+for (var i = 0; i < pinsData.length; i++) {
+  documentFragment.appendChild(createDomElement(pinsData[i]));
 }
 
 pinList.appendChild(documentFragment);
