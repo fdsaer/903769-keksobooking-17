@@ -13,20 +13,20 @@ var documentFragment = document.createDocumentFragment();
 var mapWidth = pinList.offsetWidth;
 var pinsData = [];
 
-var getRandom = function (list) {
-  var randomItem = Math.floor(Math.random() * list.length);
-  return list[randomItem];
+var getRandomArrayItem = function (arr) {
+  var randomItem = Math.floor(Math.random() * arr.length);
+  return arr[randomItem];
 };
 
-var getPinData = function (serialNumber) {
+var getPinData = function (index) {
   var xPoint = Math.floor(Math.random() * mapWidth);
   var yPoint = Math.floor(Math.random() * (MAP_HEIGHT_MAX - MAP_HEIGHT_MIN + 1) + MAP_HEIGHT_MIN);
   return {
     'author': {
-      'avatar': 'img/avatars/user0' + (serialNumber + 1) + '.png'
+      'avatar': 'img/avatars/user0' + (index + 1) + '.png'
     },
     'offer': {
-      'type': getRandom(HOUSE_TYPE)
+      'type': getRandomArrayItem(HOUSE_TYPE)
     },
     'location': {
       'x': xPoint,
@@ -35,7 +35,7 @@ var getPinData = function (serialNumber) {
   };
 };
 
-var collectPins = function () {
+var getPinsData = function () {
   var pinsAround = [];
   for (var i = 0; i < NUMBER_OF_PINS; i++) {
     pinsAround[i] = getPinData(i);
@@ -43,19 +43,19 @@ var collectPins = function () {
   return pinsAround;
 };
 
-pinsData = collectPins();
+pinsData = getPinsData();
 
-var createDomElement = function (objectData) {
+var createPinElement = function (pictureData) {
   var mapPin = pinTemlate.cloneNode(true);
   var avatarImg = mapPin.querySelector('img');
-  mapPin.style = 'left: ' + (objectData.location.x - PIN_WIDTH / 2) + 'px; top: ' + (objectData.location.y - PIN_HEIGHT) + 'px;';
-  avatarImg.src = objectData.author.avatar;
-  avatarImg.alt = objectData.offer.type;
+  mapPin.style = 'left: ' + (pictureData.location.x - PIN_WIDTH / 2) + 'px; top: ' + (pictureData.location.y - PIN_HEIGHT) + 'px;';
+  avatarImg.src = pictureData.author.avatar;
+  avatarImg.alt = pictureData.offer.type;
   return mapPin;
 };
 
 for (var i = 0; i < pinsData.length; i++) {
-  documentFragment.appendChild(createDomElement(pinsData[i]));
+  documentFragment.appendChild(createPinElement(pinsData[i]));
 }
 
 pinList.appendChild(documentFragment);
