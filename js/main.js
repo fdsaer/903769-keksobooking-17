@@ -6,12 +6,18 @@ var NUMBER_OF_PINS = 8;
 var HOUSE_TYPE = ['palace', 'flat', 'house', 'bungalo'];
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
+var MAIN_PIN_HEIGHT = 80;
 
-var pinList = document.querySelector('.map__pins');
+var map = document.querySelector('.map');
+var pinList = map.querySelector('.map__pins');
 var pinTemlate = document.querySelector('#pin').content.querySelector('.map__pin');
 var documentFragment = document.createDocumentFragment();
-var mapWidth = pinList.offsetWidth;
+var mapWidth = map.offsetWidth;
 var pinsData = [];
+var mainPin = pinList.querySelector('.map__pin--main');
+var adForm = document.querySelector('.ad-form');
+var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
+var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -43,8 +49,6 @@ var getPinsData = function () {
   return pinsAround;
 };
 
-pinsData = getPinsData();
-
 var createPinElement = function (pictureData) {
   var mapPin = pinTemlate.cloneNode(true);
   var avatarImg = mapPin.querySelector('img');
@@ -54,9 +58,37 @@ var createPinElement = function (pictureData) {
   return mapPin;
 };
 
+var toggleDisabled = function (disabledValue) {
+  for (var i = 0; i < formElements.length; i++) {
+    formElements[i].disabled = disabledValue;
+  }
+};
+
+var activatePage = function () {
+  map.classList.remove('map--faded');
+  adForm.classList.remove('ad-form--disabled');
+  toggleDisabled(false);
+};
+
+var setAddressField = function (point) {
+  var addressField = adForm.querySelector('input[name=address]');
+  addressField.value = (point[0] + mainPin.offsetWidth / 2) + ',' + (point[1] + MAIN_PIN_HEIGHT);
+};
+
+pinsData = getPinsData();
+
 for (var i = 0; i < pinsData.length; i++) {
   documentFragment.appendChild(createPinElement(pinsData[i]));
 }
 
-pinList.appendChild(documentFragment);
-document.querySelector('.map').classList.remove('map--faded');
+toggleDisabled(true);
+setAddressField(startingPoint);
+
+mainPin.addEventListener('click', function () {
+  activatePage();
+  pinList.appendChild(documentFragment);
+});
+
+mainPin.addEventListener('mouseup', function (evt) {
+  setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
+});
