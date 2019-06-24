@@ -6,7 +6,7 @@ var NUMBER_OF_PINS = 8;
 var HOUSE_TYPE = ['palace', 'flat', 'house', 'bungalo'];
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
-var MAIN_PIN_HEIGHT = 84;
+var MAIN_PIN_HEIGHT = 80;
 
 var map = document.querySelector('.map');
 var pinList = map.querySelector('.map__pins');
@@ -17,6 +17,7 @@ var pinsData = [];
 var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
+var disabledElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -57,23 +58,20 @@ var createPinElement = function (pictureData) {
   return mapPin;
 };
 
-var setElementsAttribute = function (selectorList, attribute) {
-  for (var i = 0; i < selectorList.length; i++) {
-    var elementList = document.querySelectorAll(selectorList[i]);
-    for (var j = 0; j < elementList.length; j++) {
-      if (attribute === 'enabled') {
-        elementList[j].removeAttribute('disabled', 'disabled');
-      } else if (attribute === 'disabled') {
-        elementList[j].setAttribute(attribute, attribute);
-      }
+var setElementsAttribute = function (elementList, attribute) {
+  for (var i = 0; i < elementList.length; i++) {
+    if (attribute === 'enabled') {
+      elementList[i].disabled = false;
+    } else if (attribute === 'disabled') {
+      elementList[i].disabled = true;
     }
   }
 };
 
 var activatePage = function () {
-  document.querySelector('.map').classList.remove('map--faded');
+  map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
-  setElementsAttribute(['.map__filters fieldset', '.map__filters select', '.ad-form fieldset'], 'enabled');
+  setElementsAttribute(disabledElements, 'enabled');
 };
 
 var setAddressField = function (point) {
@@ -87,7 +85,7 @@ for (var i = 0; i < pinsData.length; i++) {
   documentFragment.appendChild(createPinElement(pinsData[i]));
 }
 
-setElementsAttribute(['.map__filters fieldset', '.map__filters select', '.ad-form fieldset'], 'disabled');
+setElementsAttribute(disabledElements, 'disabled');
 setAddressField(startingPoint);
 
 mainPin.addEventListener('click', function () {
@@ -95,6 +93,6 @@ mainPin.addEventListener('click', function () {
   pinList.appendChild(documentFragment);
 });
 
-mainPin.addEventListener('mouseup', function () {
-  setAddressField(['xxx', 'yyy']);
+mainPin.addEventListener('mouseup', function (evt) {
+  setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
 });
