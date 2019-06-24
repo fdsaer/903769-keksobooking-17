@@ -58,16 +58,16 @@ var createPinElement = function (pictureData) {
   return mapPin;
 };
 
-var setElementsProprty = function (property) {
+var toggleDisabled = function (disabledValue) {
   for (var i = 0; i < formElements.length; i++) {
-    formElements[i].disabled = property;
+    formElements[i].disabled = disabledValue;
   }
 };
 
 var activatePage = function () {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
-  setElementsProprty(false);
+  toggleDisabled(false);
 };
 
 var setAddressField = function (point) {
@@ -81,7 +81,7 @@ for (var i = 0; i < pinsData.length; i++) {
   documentFragment.appendChild(createPinElement(pinsData[i]));
 }
 
-setElementsProprty(true);
+toggleDisabled(true);
 setAddressField(startingPoint);
 
 mainPin.addEventListener('click', function () {
