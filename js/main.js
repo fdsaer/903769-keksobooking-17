@@ -17,7 +17,7 @@ var pinsData = [];
 var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
-var disabledElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
+var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -58,20 +58,16 @@ var createPinElement = function (pictureData) {
   return mapPin;
 };
 
-var setElementsAttribute = function (elementList, attribute) {
-  for (var i = 0; i < elementList.length; i++) {
-    if (attribute === 'enabled') {
-      elementList[i].disabled = false;
-    } else if (attribute === 'disabled') {
-      elementList[i].disabled = true;
-    }
+var setElementsProprty = function (property) {
+  for (var i = 0; i < formElements.length; i++) {
+    formElements[i].disabled = property;
   }
 };
 
 var activatePage = function () {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
-  setElementsAttribute(disabledElements, 'enabled');
+  setElementsProprty(false);
 };
 
 var setAddressField = function (point) {
@@ -85,7 +81,7 @@ for (var i = 0; i < pinsData.length; i++) {
   documentFragment.appendChild(createPinElement(pinsData[i]));
 }
 
-setElementsAttribute(disabledElements, 'disabled');
+setElementsProprty(true);
 setAddressField(startingPoint);
 
 mainPin.addEventListener('click', function () {
