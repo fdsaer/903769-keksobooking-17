@@ -82,6 +82,10 @@ var setAddressField = function (point) {
   addressField.value = (point[0] + mainPin.offsetWidth / 2) + ',' + (point[1] + MAIN_PIN_HEIGHT);
 };
 
+var setTimeField = function (selectElement, value) {
+  selectElement.value = value;
+};
+
 pinsData = getPinsData();
 
 for (var i = 0; i < pinsData.length; i++) {
@@ -105,12 +109,10 @@ adForm.querySelector('select[name=type]').addEventListener('change', function (e
   priceField.min = HOUSE_PRICE[evt.currentTarget.value];
 });
 
-var setTimeField = function (eventObjectName, targetObjectName) {
-  adForm.querySelector('select[name=' + eventObjectName + ']').addEventListener('change', function (evt) {
-    adForm.querySelector('select[name=' + targetObjectName + ']').value = evt.currentTarget.value;
-  });
-};
+adForm.querySelector('select[name=timein]').addEventListener('change', function () {
+  setTimeField(adForm.querySelector('select[name=timeout]'), adForm.querySelector('select[name=timein]').value);
+});
 
-setTimeField('timein', 'timeout');
-setTimeField('timeout', 'timein');
-
+adForm.querySelector('select[name=timeout]').addEventListener('change', function () {
+  setTimeField(adForm.querySelector('select[name=timein]'), adForm.querySelector('select[name=timeout]').value);
+});
