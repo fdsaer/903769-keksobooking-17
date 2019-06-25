@@ -27,6 +27,7 @@ var formElements = document.querySelectorAll('.map__filters fieldset, .map__filt
 var priceField = adForm.querySelector('input[name=price]');
 var timeInField = adForm.querySelector('select[name=timein]');
 var timeOutField = adForm.querySelector('select[name=timeout]');
+var houseTypeField = adForm.querySelector('select[name=type]');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -88,6 +89,13 @@ var setTimeField = function (selectElement, value) {
   selectElement.value = value;
 };
 
+var onTypeFieldClick = function () {
+  priceField.placeholder = HOUSE_PRICE[houseTypeField.value];
+  priceField.min = HOUSE_PRICE[houseTypeField.value];
+};
+
+onTypeFieldClick();
+
 pinsData = getPinsData();
 
 for (var i = 0; i < pinsData.length; i++) {
@@ -106,10 +114,7 @@ mainPin.addEventListener('mouseup', function (evt) {
   setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
 });
 
-adForm.querySelector('select[name=type]').addEventListener('change', function (evt) {
-  priceField.placeholder = HOUSE_PRICE[evt.currentTarget.value];
-  priceField.min = HOUSE_PRICE[evt.currentTarget.value];
-});
+houseTypeField.addEventListener('change', onTypeFieldClick);
 
 timeInField.addEventListener('change', function () {
   setTimeField(timeOutField, timeInField.value);
