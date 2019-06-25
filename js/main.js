@@ -24,9 +24,7 @@ var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
-var houseSelector = adForm.querySelectorAll('select[name=type] option');
 var priceField = adForm.querySelector('input[name=price]');
-var timesInOut = adForm.querySelectorAll('.ad-form__element--time option');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -102,16 +100,15 @@ mainPin.addEventListener('mouseup', function (evt) {
   setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
 });
 
-for (i = 0; i < houseSelector.length; i++) {
-  houseSelector[i].addEventListener('click', function (evt) {
-    priceField.placeholder = HOUSE_PRICE[evt.currentTarget.value];
-    priceField.min = HOUSE_PRICE[evt.currentTarget.value];
-  });
-}
+adForm.querySelector('select[name=type]').addEventListener('change', function (evt) {
+  priceField.placeholder = HOUSE_PRICE[evt.currentTarget.value];
+  priceField.min = HOUSE_PRICE[evt.currentTarget.value];
+});
 
-for (i = 0; i < timesInOut.length; i++) {
-  timesInOut[i].addEventListener('click', function (evt) {
-    adForm.querySelector('select[name=timeout] option[value="' + [evt.currentTarget.value] + '"]').selected = true;
-    adForm.querySelector('select[name=timein] option[value="' + [evt.currentTarget.value] + '"]').selected = true;
-  });
-}
+adForm.querySelector('select[name=timein]').addEventListener('change', function (evt) {
+  adForm.querySelector('select[name=timeout]').value = evt.currentTarget.value;
+});
+
+adForm.querySelector('select[name=timeout]').addEventListener('change', function (evt) {
+  adForm.querySelector('select[name=timein]').value = evt.currentTarget.value;
+});
