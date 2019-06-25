@@ -25,6 +25,8 @@ var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 var priceField = adForm.querySelector('input[name=price]');
+var timeInField = adForm.querySelector('select[name=timein]');
+var timeOutField = adForm.querySelector('select[name=timeout]');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -109,10 +111,10 @@ adForm.querySelector('select[name=type]').addEventListener('change', function (e
   priceField.min = HOUSE_PRICE[evt.currentTarget.value];
 });
 
-adForm.querySelector('select[name=timein]').addEventListener('change', function () {
-  setTimeField(adForm.querySelector('select[name=timeout]'), adForm.querySelector('select[name=timein]').value);
+timeInField.addEventListener('change', function () {
+  setTimeField(timeOutField, timeInField.value);
 });
 
-adForm.querySelector('select[name=timeout]').addEventListener('change', function () {
-  setTimeField(adForm.querySelector('select[name=timein]'), adForm.querySelector('select[name=timeout]').value);
+timeOutField.addEventListener('change', function () {
+  setTimeField(timeInField, timeOutField.value);
 });
