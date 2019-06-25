@@ -7,6 +7,12 @@ var HOUSE_TYPE = ['palace', 'flat', 'house', 'bungalo'];
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var MAIN_PIN_HEIGHT = 80;
+var HOUSE_PRICE = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 10000
+};
 
 var map = document.querySelector('.map');
 var pinList = map.querySelector('.map__pins');
@@ -18,6 +24,9 @@ var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
+var houseSelector = adForm.querySelectorAll('select[name=type] option');
+var priceField = adForm.querySelector('input[name=price]');
+var timesInOut = adForm.querySelectorAll('.ad-form__element--time option');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -92,3 +101,17 @@ mainPin.addEventListener('click', function () {
 mainPin.addEventListener('mouseup', function (evt) {
   setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
 });
+
+for (i = 0; i < houseSelector.length; i++) {
+  houseSelector[i].addEventListener('click', function (evt) {
+    priceField.placeholder = HOUSE_PRICE[evt.currentTarget.value];
+    priceField.min = HOUSE_PRICE[evt.currentTarget.value];
+  });
+}
+
+for (i = 0; i < timesInOut.length; i++) {
+  timesInOut[i].addEventListener('click', function (evt) {
+    adForm.querySelector('select[name=timeout] option[value="' + [evt.currentTarget.value] + '"]').selected = true;
+    adForm.querySelector('select[name=timein] option[value="' + [evt.currentTarget.value] + '"]').selected = true;
+  });
+}
