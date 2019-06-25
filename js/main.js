@@ -105,10 +105,12 @@ adForm.querySelector('select[name=type]').addEventListener('change', function (e
   priceField.min = HOUSE_PRICE[evt.currentTarget.value];
 });
 
-adForm.querySelector('select[name=timein]').addEventListener('change', function (evt) {
-  adForm.querySelector('select[name=timeout]').value = evt.currentTarget.value;
-});
+var setTimeField = function (eventObjectName, targetObjectName) {
+  adForm.querySelector('select[name=' + eventObjectName + ']').addEventListener('change', function (evt) {
+    adForm.querySelector('select[name=' + targetObjectName + ']').value = evt.currentTarget.value;
+  });
+};
 
-adForm.querySelector('select[name=timeout]').addEventListener('change', function (evt) {
-  adForm.querySelector('select[name=timein]').value = evt.currentTarget.value;
-});
+setTimeField('timein', 'timeout');
+setTimeField('timeout', 'timein');
+
