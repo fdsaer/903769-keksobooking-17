@@ -7,6 +7,12 @@ var HOUSE_TYPE = ['palace', 'flat', 'house', 'bungalo'];
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var MAIN_PIN_HEIGHT = 80;
+var HOUSE_PRICE = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 10000
+};
 
 var map = document.querySelector('.map');
 var pinList = map.querySelector('.map__pins');
@@ -18,6 +24,10 @@ var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
 var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
+var priceField = adForm.querySelector('input[name=price]');
+var timeInField = adForm.querySelector('select[name=timein]');
+var timeOutField = adForm.querySelector('select[name=timeout]');
+var houseTypeField = adForm.querySelector('select[name=type]');
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -75,14 +85,14 @@ var setAddressField = function (point) {
   addressField.value = (point[0] + mainPin.offsetWidth / 2) + ',' + (point[1] + MAIN_PIN_HEIGHT);
 };
 
-pinsData = getPinsData();
+var setTimeField = function (selectElement, value) {
+  selectElement.value = value;
+};
 
-for (var i = 0; i < pinsData.length; i++) {
-  documentFragment.appendChild(createPinElement(pinsData[i]));
-}
-
-toggleDisabled(true);
-setAddressField(startingPoint);
+var onTypeFieldClick = function () {
+  priceField.placeholder = HOUSE_PRICE[houseTypeField.value];
+  priceField.min = HOUSE_PRICE[houseTypeField.value];
+};
 
 mainPin.addEventListener('click', function () {
   activatePage();
@@ -92,3 +102,24 @@ mainPin.addEventListener('click', function () {
 mainPin.addEventListener('mouseup', function (evt) {
   setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
 });
+
+houseTypeField.addEventListener('change', onTypeFieldClick);
+
+timeInField.addEventListener('change', function () {
+  setTimeField(timeOutField, timeInField.value);
+});
+
+timeOutField.addEventListener('change', function () {
+  setTimeField(timeInField, timeOutField.value);
+});
+
+onTypeFieldClick();
+
+pinsData = getPinsData();
+
+for (var i = 0; i < pinsData.length; i++) {
+  documentFragment.appendChild(createPinElement(pinsData[i]));
+}
+
+toggleDisabled(true);
+setAddressField(startingPoint);
