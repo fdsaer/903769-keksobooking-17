@@ -94,17 +94,6 @@ var onTypeFieldClick = function () {
   priceField.min = HOUSE_PRICE[houseTypeField.value];
 };
 
-onTypeFieldClick();
-
-pinsData = getPinsData();
-
-for (var i = 0; i < pinsData.length; i++) {
-  documentFragment.appendChild(createPinElement(pinsData[i]));
-}
-
-toggleDisabled(true);
-setAddressField(startingPoint);
-
 mainPin.addEventListener('click', function () {
   activatePage();
   pinList.appendChild(documentFragment);
@@ -123,3 +112,14 @@ timeInField.addEventListener('change', function () {
 timeOutField.addEventListener('change', function () {
   setTimeField(timeInField, timeOutField.value);
 });
+
+onTypeFieldClick();
+
+pinsData = getPinsData();
+
+for (var i = 0; i < pinsData.length; i++) {
+  documentFragment.appendChild(createPinElement(pinsData[i]));
+}
+
+toggleDisabled(true);
+setAddressField(startingPoint);
