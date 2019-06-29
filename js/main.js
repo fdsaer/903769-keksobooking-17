@@ -22,13 +22,14 @@ var mapWidth = map.offsetWidth;
 var pinsData = [];
 var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
-var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
+var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT];
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 var priceField = adForm.querySelector('input[name=price]');
 var timeInField = adForm.querySelector('select[name=timein]');
 var timeOutField = adForm.querySelector('select[name=timeout]');
 var houseTypeField = adForm.querySelector('select[name=type]');
 var mainPinWidth = mainPin.offsetWidth;
+var pageIsActive = false;
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -79,11 +80,12 @@ var activatePage = function () {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
   toggleDisabled(false);
+  pageIsActive = true;
 };
 
 var setAddressField = function (point) {
   var addressField = adForm.querySelector('input[name=address]');
-  addressField.value = (point[0] + mainPinWidth / 2) + ',' + (point[1] + MAIN_PIN_HEIGHT);
+  addressField.value = (point[0] + Math.round(mainPinWidth / 2)) + ',' + (point[1] + MAIN_PIN_HEIGHT);
 };
 
 var setTimeField = function (selectElement, value) {
@@ -107,8 +109,10 @@ timeOutField.addEventListener('change', function () {
 
 mainPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
-  activatePage();
-  var startingCoords = {
+  if (!pageIsActive) {
+    activatePage();
+  }
+  var startingCoordinates = {
     x: evt.clientX,
     y: evt.clientY
   };
@@ -116,53 +120,53 @@ mainPin.addEventListener('mousedown', function (evt) {
   var currentY;
   var yTopRange = 0;
   var yBottomRange = Infinity;
-  var onMouseMoveFunction = function (moveEvt) {
+  var onDocumentMouseMove = function (moveEvt) {
     evt.preventDefault();
     if (moveEvt.clientX > map.offsetLeft && moveEvt.clientX < map.offsetLeft + mapWidth && moveEvt.clientY > yTopRange && moveEvt.clientY < yBottomRange) {
       currentX = moveEvt.clientX;
       currentY = moveEvt.clientY;
     }
     var shift = {
-      x: startingCoords.x - currentX,
-      y: startingCoords.y - currentY
+      x: startingCoordinates.x - currentX,
+      y: startingCoordinates.y - currentY
     };
-    startingCoords = {
+    startingCoordinates = {
       x: currentX,
       y: currentY
     };
-    var finalCoords = {
+    var finalCoordinates = {
       x: parseInt(mainPin.style.left, 10) - shift.x,
       y: parseInt(mainPin.style.top, 10) - shift.y
     };
-    mainPin.style.left = finalCoords.x + 'px';
-    if (finalCoords.x < 0 - mainPinWidth / 2) {
-      mainPin.style.left = 0 - mainPinWidth / 2 + 'px';
+    mainPin.style.left = finalCoordinates.x + 'px';
+    if (finalCoordinates.x < 0 - Math.round(mainPinWidth / 2)) {
+      mainPin.style.left = 0 - Math.round(mainPinWidth / 2) + 'px';
       currentX = map.offsetLeft;
-    } else if (finalCoords.x > mapWidth - mainPinWidth / 2) {
-      mainPin.style.left = mapWidth - mainPinWidth / 2 + 'px';
+    } else if (finalCoordinates.x > mapWidth - Math.round(mainPinWidth / 2)) {
+      mainPin.style.left = mapWidth - Math.round(mainPinWidth / 2) + 'px';
       currentX = map.offsetLeft + mapWidth;
     }
-    mainPin.style.top = finalCoords.y + 'px';
-    if (finalCoords.y < MAP_HEIGHT_MIN - MAIN_PIN_HEIGHT) {
+    mainPin.style.top = finalCoordinates.y + 'px';
+    if (finalCoordinates.y < MAP_HEIGHT_MIN - MAIN_PIN_HEIGHT) {
       mainPin.style.top = MAP_HEIGHT_MIN - MAIN_PIN_HEIGHT + 'px';
       yTopRange = currentY;
       currentY = yTopRange;
-    } else if (finalCoords.y > MAP_HEIGHT_MAX - MAIN_PIN_HEIGHT) {
+    } else if (finalCoordinates.y > MAP_HEIGHT_MAX - MAIN_PIN_HEIGHT) {
       mainPin.style.top = MAP_HEIGHT_MAX - MAIN_PIN_HEIGHT + 'px';
       yBottomRange = currentY;
       currentY = yBottomRange;
     }
-    setAddressField([finalCoords.x, finalCoords.y]);
+    setAddressField([finalCoordinates.x, finalCoordinates.y]);
   };
-  var onMouseUpFunction = function (upEvt) {
+  var onMainPinMouseUp = function (upEvt) {
     upEvt.preventDefault();
-    removeEventListener('mousemove', onMouseMoveFunction);
-    removeEventListener('mouseup', onMouseUpFunction);
+    document.removeEventListener('mousemove', onDocumentMouseMove);
+    document.removeEventListener('mouseup', onMainPinMouseUp);
     pinList.appendChild(documentFragment);
     setAddressField([parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10)]);
   };
-  addEventListener('mousemove', onMouseMoveFunction);
-  addEventListener('mouseup', onMouseUpFunction);
+  document.addEventListener('mousemove', onDocumentMouseMove);
+  document.addEventListener('mouseup', onMainPinMouseUp);
 });
 
 onTypeFieldClick();
