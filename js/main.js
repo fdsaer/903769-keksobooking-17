@@ -22,7 +22,10 @@ var mapWidth = map.offsetWidth;
 var pinsData = [];
 var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
-var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT];
+var startingPoint = {
+  x: parseInt(mainPin.style.left, 10),
+  y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
+};
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 var priceField = adForm.querySelector('input[name=price]');
 var timeInField = adForm.querySelector('select[name=timein]');
@@ -85,7 +88,7 @@ var activatePage = function () {
 
 var setAddressField = function (point) {
   var addressField = adForm.querySelector('input[name=address]');
-  addressField.value = (point[0] + Math.round(mainPinWidth / 2)) + ',' + (point[1] + MAIN_PIN_HEIGHT);
+  addressField.value = (point.x + Math.round(mainPinWidth / 2)) + ',' + (point.y + MAIN_PIN_HEIGHT);
 };
 
 var setTimeField = function (selectElement, value) {
@@ -111,19 +114,26 @@ mainPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
   if (!pageIsActive) {
     activatePage();
+    setAddressField({
+      x: parseInt(mainPin.style.left, 10),
+      y: parseInt(mainPin.style.top, 10)
+    });
   }
   var startingCoordinates = {
     x: evt.clientX,
     y: evt.clientY
   };
+  var xOffset = Math.round(mainPinWidth / 2);
   var currentX;
   var currentY;
   var yTopRange = 0;
   var yBottomRange = Infinity;
   var onDocumentMouseMove = function (moveEvt) {
     evt.preventDefault();
-    if (moveEvt.clientX > map.offsetLeft && moveEvt.clientX < map.offsetLeft + mapWidth && moveEvt.clientY > yTopRange && moveEvt.clientY < yBottomRange) {
+    if (moveEvt.clientX > map.offsetLeft && moveEvt.clientX < map.offsetLeft + mapWidth) {
       currentX = moveEvt.clientX;
+    }
+    if (moveEvt.clientY > yTopRange && moveEvt.clientY < yBottomRange) {
       currentY = moveEvt.clientY;
     }
     var shift = {
@@ -139,11 +149,11 @@ mainPin.addEventListener('mousedown', function (evt) {
       y: parseInt(mainPin.style.top, 10) - shift.y
     };
     mainPin.style.left = finalCoordinates.x + 'px';
-    if (finalCoordinates.x < 0 - Math.round(mainPinWidth / 2)) {
-      mainPin.style.left = 0 - Math.round(mainPinWidth / 2) + 'px';
+    if (finalCoordinates.x < -xOffset) {
+      mainPin.style.left = -xOffset + 'px';
       currentX = map.offsetLeft;
-    } else if (finalCoordinates.x > mapWidth - Math.round(mainPinWidth / 2)) {
-      mainPin.style.left = mapWidth - Math.round(mainPinWidth / 2) + 'px';
+    } else if (finalCoordinates.x > mapWidth - xOffset) {
+      mainPin.style.left = mapWidth - xOffset + 'px';
       currentX = map.offsetLeft + mapWidth;
     }
     mainPin.style.top = finalCoordinates.y + 'px';
@@ -156,14 +166,13 @@ mainPin.addEventListener('mousedown', function (evt) {
       yBottomRange = currentY;
       currentY = yBottomRange;
     }
-    setAddressField([finalCoordinates.x, finalCoordinates.y]);
+    setAddressField(finalCoordinates);
   };
   var onMainPinMouseUp = function (upEvt) {
     upEvt.preventDefault();
     document.removeEventListener('mousemove', onDocumentMouseMove);
     document.removeEventListener('mouseup', onMainPinMouseUp);
     pinList.appendChild(documentFragment);
-    setAddressField([parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10)]);
   };
   document.addEventListener('mousemove', onDocumentMouseMove);
   document.addEventListener('mouseup', onMainPinMouseUp);
