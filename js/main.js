@@ -22,12 +22,17 @@ var mapWidth = map.offsetWidth;
 var pinsData = [];
 var mainPin = pinList.querySelector('.map__pin--main');
 var adForm = document.querySelector('.ad-form');
-var startingPoint = [parseInt(mainPin.style.left, 10), parseInt(mainPin.style.top, 10) + mainPin.offsetHeight / 2 - MAIN_PIN_HEIGHT];
+var startingPoint = {
+  x: parseInt(mainPin.style.left, 10),
+  y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
+};
 var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
 var priceField = adForm.querySelector('input[name=price]');
 var timeInField = adForm.querySelector('select[name=timein]');
 var timeOutField = adForm.querySelector('select[name=timeout]');
 var houseTypeField = adForm.querySelector('select[name=type]');
+var mainPinWidth = mainPin.offsetWidth;
+var pageIsActive = false;
 
 var getRandomArrayItem = function (arr) {
   var randomItem = Math.floor(Math.random() * arr.length);
@@ -78,11 +83,12 @@ var activatePage = function () {
   map.classList.remove('map--faded');
   adForm.classList.remove('ad-form--disabled');
   toggleDisabled(false);
+  pageIsActive = true;
 };
 
 var setAddressField = function (point) {
   var addressField = adForm.querySelector('input[name=address]');
-  addressField.value = (point[0] + mainPin.offsetWidth / 2) + ',' + (point[1] + MAIN_PIN_HEIGHT);
+  addressField.value = (point.x + Math.round(mainPinWidth / 2)) + ',' + (point.y + MAIN_PIN_HEIGHT);
 };
 
 var setTimeField = function (selectElement, value) {
@@ -94,15 +100,6 @@ var onTypeFieldClick = function () {
   priceField.min = HOUSE_PRICE[houseTypeField.value];
 };
 
-mainPin.addEventListener('click', function () {
-  activatePage();
-  pinList.appendChild(documentFragment);
-});
-
-mainPin.addEventListener('mouseup', function (evt) {
-  setAddressField([parseInt(evt.currentTarget.style.left, 10), parseInt(evt.currentTarget.style.top, 10)]);
-});
-
 houseTypeField.addEventListener('change', onTypeFieldClick);
 
 timeInField.addEventListener('change', function () {
@@ -111,6 +108,74 @@ timeInField.addEventListener('change', function () {
 
 timeOutField.addEventListener('change', function () {
   setTimeField(timeInField, timeOutField.value);
+});
+
+mainPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  if (!pageIsActive) {
+    activatePage();
+    setAddressField({
+      x: parseInt(mainPin.style.left, 10),
+      y: parseInt(mainPin.style.top, 10)
+    });
+  }
+  var startingCoordinates = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+  var xOffset = Math.round(mainPinWidth / 2);
+  var currentX;
+  var currentY;
+  var yTopRange = 0;
+  var yBottomRange = Infinity;
+  var onDocumentMouseMove = function (moveEvt) {
+    evt.preventDefault();
+    if (moveEvt.clientX > map.offsetLeft && moveEvt.clientX < map.offsetLeft + mapWidth) {
+      currentX = moveEvt.clientX;
+    }
+    if (moveEvt.clientY > yTopRange && moveEvt.clientY < yBottomRange) {
+      currentY = moveEvt.clientY;
+    }
+    var shift = {
+      x: startingCoordinates.x - currentX,
+      y: startingCoordinates.y - currentY
+    };
+    startingCoordinates = {
+      x: currentX,
+      y: currentY
+    };
+    var finalCoordinates = {
+      x: parseInt(mainPin.style.left, 10) - shift.x,
+      y: parseInt(mainPin.style.top, 10) - shift.y
+    };
+    mainPin.style.left = finalCoordinates.x + 'px';
+    if (finalCoordinates.x < -xOffset) {
+      mainPin.style.left = -xOffset + 'px';
+      currentX = map.offsetLeft;
+    } else if (finalCoordinates.x > mapWidth - xOffset) {
+      mainPin.style.left = mapWidth - xOffset + 'px';
+      currentX = map.offsetLeft + mapWidth;
+    }
+    mainPin.style.top = finalCoordinates.y + 'px';
+    if (finalCoordinates.y < MAP_HEIGHT_MIN - MAIN_PIN_HEIGHT) {
+      mainPin.style.top = MAP_HEIGHT_MIN - MAIN_PIN_HEIGHT + 'px';
+      yTopRange = currentY;
+      currentY = yTopRange;
+    } else if (finalCoordinates.y > MAP_HEIGHT_MAX - MAIN_PIN_HEIGHT) {
+      mainPin.style.top = MAP_HEIGHT_MAX - MAIN_PIN_HEIGHT + 'px';
+      yBottomRange = currentY;
+      currentY = yBottomRange;
+    }
+    setAddressField(finalCoordinates);
+  };
+  var onMainPinMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    document.removeEventListener('mousemove', onDocumentMouseMove);
+    document.removeEventListener('mouseup', onMainPinMouseUp);
+    pinList.appendChild(documentFragment);
+  };
+  document.addEventListener('mousemove', onDocumentMouseMove);
+  document.addEventListener('mouseup', onMainPinMouseUp);
 });
 
 onTypeFieldClick();
