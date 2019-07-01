@@ -5,6 +5,7 @@
   var MAP_HEIGHT_MIN = 130;
   var MAIN_PIN_HEIGHT = 80;
 
+  var documentFragment = document.createDocumentFragment();
   var map = document.querySelector('.map');
   var mapWidth = map.offsetWidth;
   var adForm = document.querySelector('.ad-form');
@@ -16,6 +17,13 @@
   var startingPoint = {
     x: parseInt(mainPin.style.left, 10),
     y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
+  };
+
+  var renderPins = function () {
+    for (var i = 0; i < window.pinsData.length; i++) {
+      documentFragment.appendChild(window.createPinElement(window.pinsData[i]));
+    }
+    pinList.appendChild(documentFragment);
   };
 
   var toggleDisabled = function (disabledValue) {
@@ -93,7 +101,7 @@
       upEvt.preventDefault();
       document.removeEventListener('mousemove', onDocumentMouseMove);
       document.removeEventListener('mouseup', onMainPinMouseUp);
-      pinList.appendChild(window.documentFragment);
+      renderPins();
     };
     document.addEventListener('mousemove', onDocumentMouseMove);
     document.addEventListener('mouseup', onMainPinMouseUp);

@@ -16,9 +16,9 @@
   var houseTypeField = adForm.querySelector('select[name=type]');
   var priceField = adForm.querySelector('input[name=price]');
 
-  window.setAddressField = function (point) {
+  window.setAddressField = function (pointData) {
     var addressField = adForm.querySelector('input[name=address]');
-    addressField.value = (point.x + Math.round(mainPinWidth / 2)) + ',' + (point.y + MAIN_PIN_HEIGHT);
+    addressField.value = (pointData.x + Math.round(mainPinWidth / 2)) + ',' + (pointData.y + MAIN_PIN_HEIGHT);
   };
 
   var setTimeField = function (selectElement, value) {
