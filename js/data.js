@@ -7,7 +7,6 @@
   var HOUSE_TYPE = ['palace', 'flat', 'house', 'bungalo'];
 
   var mapWidth = document.querySelector('.map').offsetWidth;
-  window.pinsData = [];
 
   var getRandomArrayItem = function (arr) {
     var randomItem = Math.floor(Math.random() * arr.length);

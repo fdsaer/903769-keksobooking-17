@@ -14,6 +14,7 @@
   var mainPin = pinList.querySelector('.map__pin--main');
   var mainPinWidth = mainPin.offsetWidth;
   var pageIsActive = false;
+  var pinsRendered = false;
   var startingPoint = {
     x: parseInt(mainPin.style.left, 10),
     y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
@@ -24,6 +25,7 @@
       documentFragment.appendChild(window.createPinElement(window.pinsData[i]));
     }
     pinList.appendChild(documentFragment);
+    pinsRendered = true;
   };
 
   var toggleDisabled = function (disabledValue) {
@@ -101,7 +103,9 @@
       upEvt.preventDefault();
       document.removeEventListener('mousemove', onDocumentMouseMove);
       document.removeEventListener('mouseup', onMainPinMouseUp);
-      renderPins();
+      if (!pinsRendered) {
+        renderPins();
+      }
     };
     document.addEventListener('mousemove', onDocumentMouseMove);
     document.addEventListener('mouseup', onMainPinMouseUp);
