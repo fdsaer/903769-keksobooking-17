@@ -6,6 +6,8 @@
   var MAIN_PIN_HEIGHT = 80;
 
   var documentFragment = document.createDocumentFragment();
+  var mainBlock = document.querySelector('main');
+  var errorTemplate = document.querySelector('#error').content.querySelector('.error');
   var map = document.querySelector('.map');
   var mapWidth = map.offsetWidth;
   var adForm = document.querySelector('.ad-form');
@@ -20,12 +22,27 @@
     y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
   };
 
-  var renderPins = function () {
-    for (var i = 0; i < window.pinsData.length; i++) {
-      documentFragment.appendChild(window.createPinElement(window.pinsData[i]));
+  var successHandler = function (pinsData) {
+    for (var i = 0; i < pinsData.length; i++) {
+      documentFragment.appendChild(window.createPinElement(pinsData[i]));
     }
     pinList.appendChild(documentFragment);
     pinsRendered = true;
+  };
+
+  var errorHandler = function (errorStatus) {
+    var errorModule = errorTemplate.cloneNode(true);
+    var errorModuleMessage = errorModule.querySelector('.error__message');
+    var errorTryAgain = errorModule.querySelector('.error__button');
+    var messageText = errorModuleMessage.textContent + errorStatus;
+    var tryHandler = function () {
+      errorTryAgain.removeEventListener('click', tryHandler);
+      mainBlock.removeChild(errorModule);
+      window.downloadData(successHandler, errorHandler);
+    };
+    errorModuleMessage.textContent = messageText;
+    mainBlock.appendChild(errorModule);
+    errorTryAgain.addEventListener('click', tryHandler);
   };
 
   var toggleDisabled = function (disabledValue) {
@@ -104,7 +121,7 @@
       document.removeEventListener('mousemove', onDocumentMouseMove);
       document.removeEventListener('mouseup', onMainPinMouseUp);
       if (!pinsRendered) {
-        renderPins();
+        window.downloadData(successHandler, errorHandler);
       }
     };
     document.addEventListener('mousemove', onDocumentMouseMove);
