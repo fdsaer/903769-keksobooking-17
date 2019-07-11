@@ -11,23 +11,49 @@
   var map = document.querySelector('.map');
   var mapWidth = map.offsetWidth;
   var adForm = document.querySelector('.ad-form');
+  var mapFilters = document.querySelector('.map__filters');
   var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
   var pinList = map.querySelector('.map__pins');
   var mainPin = pinList.querySelector('.map__pin--main');
   var mainPinWidth = mainPin.offsetWidth;
   var pageIsActive = false;
   var pinsRendered = false;
+  var houseTypeToggle = mapFilters.querySelector('#housing-type');
+  var housePriceToggle = mapFilters.querySelector('#housing-price');
+  var houseRoomsToggle = mapFilters.querySelector('#housing-rooms');
+  var houseGuestsToggle = mapFilters.querySelector('#housing-guests');
   var startingPoint = {
     x: parseInt(mainPin.style.left, 10),
     y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
   };
+  var filterProperties = {
+    housingType: 'any',
+    housingRooms: 'any',
+    housingGuests: 'any',
+    housingPrice: 'any',
+    features: []
+  };
+  var pinsData = [];
 
-  var successHandler = function (pinsData) {
-    for (var i = 0; i < pinsData.length; i++) {
-      documentFragment.appendChild(window.createPinElement(pinsData[i]));
+  var renderPins = function (pinsToRender) {
+    var similarPins = pinList.querySelectorAll('.map__pin:not(.map__pin--main)');
+    for (var i = 0; i < similarPins.length; i++) {
+      pinList.removeChild(similarPins[i]);
+    }
+    for (i = 0; i < pinsToRender.length; i++) {
+      documentFragment.appendChild(window.createPinElement(pinsToRender[i]));
     }
     pinList.appendChild(documentFragment);
     pinsRendered = true;
+  };
+
+  var onFilterChange = function (filter) {
+    renderPins(window.filterData(pinsData, filter));
+  };
+
+  var successHandler = function (serverData) {
+    pinsData = serverData;
+    renderPins(window.filterData(pinsData, filterProperties));
   };
 
   var errorHandler = function (errorStatus) {
@@ -126,6 +152,26 @@
     };
     document.addEventListener('mousemove', onDocumentMouseMove);
     document.addEventListener('mouseup', onMainPinMouseUp);
+  });
+
+  houseTypeToggle.addEventListener('change', function () {
+    filterProperties.housingType = houseTypeToggle.value;
+    onFilterChange(filterProperties);
+  });
+
+  housePriceToggle.addEventListener('change', function () {
+    filterProperties.housingPrice = housePriceToggle.value;
+    onFilterChange(filterProperties);
+  });
+
+  houseRoomsToggle.addEventListener('change', function () {
+    filterProperties.housingRooms = houseRoomsToggle.value;
+    onFilterChange(filterProperties);
+  });
+
+  houseGuestsToggle.addEventListener('change', function () {
+    filterProperties.housingGuests = houseGuestsToggle.value;
+    onFilterChange(filterProperties);
   });
 
   toggleDisabled(true);
