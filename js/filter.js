@@ -33,6 +33,12 @@
     return equal;
   };
 
+  var featuresComparator = function (arr1, arr2) {
+    return arr2.every(function (it) {
+      return arr1.indexOf(it) >= 0;
+    });
+  };
+
   var getRandomArr = function (arr) {
     var randomElements = [];
     for (var i = 0; i < NUMBER_OF_PINS; i++) {
@@ -48,7 +54,8 @@
       return (comparator(el.offer.type, propertiesObj.housingType) &&
         guestsComparator(el.offer.guests, propertiesObj.housingGuests) &&
         priceComparator(el.offer.price, propertiesObj.housingPrice) &&
-        comparator((el.offer.rooms).toString(10), propertiesObj.housingRooms));
+        comparator((el.offer.rooms).toString(10), propertiesObj.housingRooms) &&
+        featuresComparator(el.offer.features, propertiesObj.features));
     });
     if (filteredPins.length > NUMBER_OF_PINS) {
       filteredPins = getRandomArr(filteredPins);
