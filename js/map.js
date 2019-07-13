@@ -16,6 +16,7 @@
   var formElements = document.querySelectorAll('.map__filters fieldset, .map__filters select, .ad-form fieldset');
   var pinList = map.querySelector('.map__pins');
   var mainPin = pinList.querySelector('.map__pin--main');
+  var similarPins = pinList.querySelectorAll('.map__pin:not(.map__pin--main)');
   var mainPinWidth = mainPin.offsetWidth;
   var pageIsActive = false;
   var pinsRendered = false;
@@ -35,8 +36,38 @@
   };
   var pinsData = [];
 
+
+  var closeCard = function () {
+    var card = map.querySelector('.map__card');
+    if (card) {
+      map.removeChild(card);
+    }
+  };
+
+  var onPopupEscPress = function (evt) {
+    if (evt.keyCode === 27) {
+      closeCard();
+    }
+    document.removeEventListener('keydown', onPopupEscPress);
+  };
+
+  var renderCard = function (data) {
+    closeCard();
+    var card = window.createCardElement(data);
+    document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
+    var closePopupButton = map.querySelector('.map__card .popup__close');
+    closePopupButton.addEventListener('click', closeCard);
+    document.addEventListener('keydown', onPopupEscPress);
+  };
+
+  var addListener = function (pin, pinData) {
+    pin.addEventListener('click', function () {
+      renderCard(pinData);
+    });
+  };
+
   var renderPins = function (pinsToRender) {
-    var similarPins = pinList.querySelectorAll('.map__pin:not(.map__pin--main)');
+    similarPins = pinList.querySelectorAll('.map__pin:not(.map__pin--main)');
     for (var i = 0; i < similarPins.length; i++) {
       pinList.removeChild(similarPins[i]);
     }
@@ -45,11 +76,10 @@
     }
     pinList.appendChild(documentFragment);
     pinsRendered = true;
-  };
-
-  var renderCard = function () {
-    var card = window.createCardElement(pinsData[2]);
-    document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
+    similarPins = pinList.querySelectorAll('.map__pin:not(.map__pin--main)');
+    for (i = 0; i < similarPins.length; i++) {
+      addListener(similarPins[i], pinsToRender[i]);
+    }
   };
 
   var debounce = function (instruction) {
@@ -89,7 +119,6 @@
   var successHandler = function (serverData) {
     pinsData = serverData;
     renderPins(window.filterData(pinsData, filterProperties));
-    renderCard();
   };
 
   var errorHandler = function (errorStatus) {
