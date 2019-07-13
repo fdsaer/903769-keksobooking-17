@@ -47,6 +47,11 @@
     pinsRendered = true;
   };
 
+  var renderCard = function () {
+    var card = window.createCardElement(pinsData[2]);
+    document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
+  };
+
   var debounce = function (instruction) {
     if (lastTimeout) {
       window.clearTimeout(lastTimeout);
@@ -84,6 +89,7 @@
   var successHandler = function (serverData) {
     pinsData = serverData;
     renderPins(window.filterData(pinsData, filterProperties));
+    renderCard();
   };
 
   var errorHandler = function (errorStatus) {
