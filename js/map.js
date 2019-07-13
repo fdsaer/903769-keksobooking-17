@@ -4,6 +4,7 @@
   var MAP_HEIGHT_MAX = 630;
   var MAP_HEIGHT_MIN = 130;
   var MAIN_PIN_HEIGHT = 80;
+  var TIMEOUT = 500;
 
   var documentFragment = document.createDocumentFragment();
   var mainBlock = document.querySelector('main');
@@ -18,19 +19,18 @@
   var mainPinWidth = mainPin.offsetWidth;
   var pageIsActive = false;
   var pinsRendered = false;
-  var houseTypeToggle = mapFilters.querySelector('#housing-type');
-  var housePriceToggle = mapFilters.querySelector('#housing-price');
-  var houseRoomsToggle = mapFilters.querySelector('#housing-rooms');
-  var houseGuestsToggle = mapFilters.querySelector('#housing-guests');
+  var mapHouseFilters = mapFilters.querySelectorAll('select');
+  var mapHouseFeatures = mapFilters.querySelectorAll('input');
+  var lastTimeout;
   var startingPoint = {
     x: parseInt(mainPin.style.left, 10),
     y: parseInt(mainPin.style.top, 10) + Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT
   };
   var filterProperties = {
-    housingType: 'any',
-    housingRooms: 'any',
-    housingGuests: 'any',
-    housingPrice: 'any',
+    housingType: mapFilters.querySelector('#housing-type').value,
+    housingRooms: mapFilters.querySelector('#housing-rooms').value,
+    housingGuests: mapFilters.querySelector('#housing-guests').value,
+    housingPrice: mapFilters.querySelector('#housing-price').value,
     features: []
   };
   var pinsData = [];
@@ -47,13 +47,49 @@
     pinsRendered = true;
   };
 
-  var onFilterChange = function (filter) {
-    renderPins(window.filterData(pinsData, filter));
+  var renderCard = function () {
+    var card = window.createCardElement(pinsData[2]);
+    document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
+  };
+
+  var debounce = function (instruction) {
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+    lastTimeout = window.setTimeout(instruction, TIMEOUT);
+  };
+
+  var onFilterChange = function (changeEvt, filter) {
+    var str = changeEvt.currentTarget.name;
+    var selectorName;
+    var toggle;
+    var newStr = str.slice(str.indexOf('-') + 1);
+    selectorName = '#housing-' + newStr;
+    toggle = mapFilters.querySelector(selectorName);
+    newStr = newStr.replace(newStr[0], newStr[0].toUpperCase());
+    filter['housing' + newStr] = toggle.value;
+    debounce(function () {
+      renderPins(window.filterData(pinsData, filter));
+    });
+  };
+
+  var onFeaturesChange = function (changeEvt, filter) {
+    var list = mapHouseFeatures;
+    filter.features = [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].checked) {
+        filter.features.push(list[i].value);
+      }
+    }
+    debounce(function () {
+      renderPins(window.filterData(pinsData, filter));
+    });
   };
 
   var successHandler = function (serverData) {
     pinsData = serverData;
     renderPins(window.filterData(pinsData, filterProperties));
+    renderCard();
   };
 
   var errorHandler = function (errorStatus) {
@@ -154,25 +190,17 @@
     document.addEventListener('mouseup', onMainPinMouseUp);
   });
 
-  houseTypeToggle.addEventListener('change', function () {
-    filterProperties.housingType = houseTypeToggle.value;
-    onFilterChange(filterProperties);
-  });
+  for (var i = 0; i < mapHouseFilters.length; i++) {
+    mapHouseFilters[i].addEventListener('change', function (evt) {
+      onFilterChange(evt, filterProperties);
+    });
+  }
 
-  housePriceToggle.addEventListener('change', function () {
-    filterProperties.housingPrice = housePriceToggle.value;
-    onFilterChange(filterProperties);
-  });
-
-  houseRoomsToggle.addEventListener('change', function () {
-    filterProperties.housingRooms = houseRoomsToggle.value;
-    onFilterChange(filterProperties);
-  });
-
-  houseGuestsToggle.addEventListener('change', function () {
-    filterProperties.housingGuests = houseGuestsToggle.value;
-    onFilterChange(filterProperties);
-  });
+  for (i = 0; i < mapHouseFeatures.length; i++) {
+    mapHouseFeatures[i].addEventListener('change', function (evt) {
+      onFeaturesChange(evt, filterProperties);
+    });
+  }
 
   toggleDisabled(true);
   window.setAddressField(startingPoint);
