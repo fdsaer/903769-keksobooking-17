@@ -64,7 +64,7 @@
     cardGuests.textContent = pinData.offer.rooms + ' комнат' +
       guestsTranslator(pinData.offer.rooms, 'room') + ' для ' +
       pinData.offer.guests + ' гост' +
-      guestsTranslator(pinData.offer.rooms, 'guest');
+      guestsTranslator(pinData.offer.guests, 'guest');
     cardTime.textContent = 'Заезд после ' + pinData.offer.checkin + ' , выезд до ' + pinData.offer.checkout;
     cardDescription.textContent = pinData.offer.description;
     return mapCard;
