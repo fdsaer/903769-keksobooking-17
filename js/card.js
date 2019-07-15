@@ -3,18 +3,18 @@
   var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
   var documentFragment = document.createDocumentFragment();
   var typeDictionary = {
-    flat: 'Квартира',
-    bungalo: 'Бунгало',
-    house: 'Дом',
-    palace: 'Дворец'
+    FLAT: 'Квартира',
+    BUNGALO: 'Бунгало',
+    HOUSE: 'Дом',
+    PALACE: 'Дворец'
   };
 
   var suffixDictionary = {
-    room: ['', 'а', 'ы'],
-    guest: ['ей', 'я', 'ей']
+    ROOM: ['', 'а', 'ы'],
+    GUEST: ['ей', 'я', 'ей']
   };
 
-  var guestsTranslator = function (number, key) {
+  var suffixConstructor = function (number, key) {
     var suffix = suffixDictionary[key][0];
     var lastNumber = parseInt(number.toString(10)[number.toString(10).length - 1], 10);
     var preLastNumber = parseInt(number.toString(10)[number.toString(10).length - 2], 10);
@@ -47,7 +47,6 @@
       newElement.classList.add('popup__feature', 'popup__feature--' + it);
     });
     cardFeaturesBlock.appendChild(documentFragment);
-
     for (var i = 0; i < pinData.offer.photos.length; i++) {
       var newPhoto = cardPhoto.cloneNode(false);
       documentFragment.appendChild(newPhoto);
@@ -60,11 +59,11 @@
     cardTitle.textContent = pinData.offer.title;
     cardAddress.textContent = pinData.offer.address;
     cardPrice.innerHTML = pinData.offer.price + String.fromCharCode(8381) + '<span>/ночь</span>';
-    cardType.textContent = typeDictionary[pinData.offer.type];
+    cardType.textContent = typeDictionary[pinData.offer.type.toUpperCase()];
     cardGuests.textContent = pinData.offer.rooms + ' комнат' +
-      guestsTranslator(pinData.offer.rooms, 'room') + ' для ' +
+      suffixConstructor(pinData.offer.rooms, 'ROOM') + ' для ' +
       pinData.offer.guests + ' гост' +
-      guestsTranslator(pinData.offer.guests, 'guest');
+      suffixConstructor(pinData.offer.guests, 'GUEST');
     cardTime.textContent = 'Заезд после ' + pinData.offer.checkin + ' , выезд до ' + pinData.offer.checkout;
     cardDescription.textContent = pinData.offer.description;
     return mapCard;

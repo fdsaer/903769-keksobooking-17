@@ -10,27 +10,15 @@
   };
 
   var guestsComparator = function (a, b) {
-    var equal;
-    if (b === '0' && a.toString(10) === b) {
-      equal = true;
-    } else if (b !== '0' && a >= parseInt(b, 10) || b === 'any') {
-      equal = true;
-    }
-    return equal;
+    return (b === '0' && a.toString(10) === b) ||
+      (b !== '0' && a >= parseInt(b, 10) || b === 'any');
   };
 
   var priceComparator = function (a, b) {
-    var equal;
-    if (b === 'any') {
-      equal = true;
-    } else if (b === 'low' && a < LOW_PRICE) {
-      equal = true;
-    } else if (b === 'middle' && a >= LOW_PRICE && a <= HIGH_PRICE) {
-      equal = true;
-    } else if (b === 'high' && a > HIGH_PRICE) {
-      equal = true;
-    }
-    return equal;
+    return (b === 'any') ||
+      (b === 'low' && a < LOW_PRICE) ||
+      (b === 'middle' && a >= LOW_PRICE && a <= HIGH_PRICE) ||
+      (b === 'high' && a > HIGH_PRICE);
   };
 
   var featuresComparator = function (arr1, arr2) {
@@ -51,7 +39,8 @@
 
   window.filterData = function (pins, propertiesObj) {
     var filteredPins = pins.filter(function (el) {
-      return (comparator(el.offer.type, propertiesObj.housingType) &&
+      return (el.offer &&
+        comparator(el.offer.type, propertiesObj.housingType) &&
         guestsComparator(el.offer.guests, propertiesObj.housingGuests) &&
         priceComparator(el.offer.price, propertiesObj.housingPrice) &&
         comparator((el.offer.rooms).toString(10), propertiesObj.housingRooms) &&
