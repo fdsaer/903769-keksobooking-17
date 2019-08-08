@@ -2,6 +2,7 @@
 
 (function () {
   var MAIN_PIN_HEIGHT = 80;
+  var FILE_TYPES = ['.gif', '.jpg', '.jpeg', '.png'];
   var HOUSE_PRICE = {
     bungalo: 0,
     flat: 1000,
@@ -18,6 +19,11 @@
   var roomsField = adForm.querySelector('select[name=rooms]');
   var guestsField = adForm.querySelector('select[name=capacity]');
   var guestsOption = guestsField.querySelectorAll('option');
+  var previewAvatar = adForm.querySelector('.ad-form-header__preview img');
+  var avatarChooser = adForm.querySelector('.ad-form-header__input');
+  var previewHousePhotoContainer = adForm.querySelector('.ad-form__photo-container');
+  var previewHouseBlock = previewHousePhotoContainer.querySelector('.ad-form__photo');
+  var housePhotoChooser = previewHousePhotoContainer.querySelector('.ad-form__input');
 
   window.setAddressField = function (pointData) {
     var addressField = adForm.querySelector('input[name=address]');
@@ -55,6 +61,37 @@
     checkValidity(rooms);
   };
 
+  var renderNewPreviewPhoto = function () {
+    var newImg;
+    var previewHouseImg = previewHouseBlock.querySelector('img');
+    if (!previewHouseImg) {
+      newImg = document.createElement('img');
+      previewHouseBlock.appendChild(newImg);
+    } else {
+      var newDiv = previewHouseBlock.cloneNode(true);
+      previewHousePhotoContainer.appendChild(newDiv);
+      newImg = newDiv.querySelector('img');
+    }
+    newImg.alt = 'Фото жилья';
+    newImg.width = 70;
+    newImg.height = 70;
+  };
+
+  var renderPreview = function (chooser, aim) {
+    var file = chooser.files[0];
+    var fileName = file.name.toLowerCase();
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+    if (matches) {
+      var reader = new FileReader();
+      reader.addEventListener('load', function () {
+        aim.src = reader.result;
+      });
+      reader.readAsDataURL(file);
+    }
+  };
+
   houseTypeField.addEventListener('change', onTypeFieldClick);
 
   timeInField.addEventListener('change', function () {
@@ -71,6 +108,17 @@
 
   guestsField.addEventListener('change', function () {
     checkValidity(roomsField.value);
+  });
+
+  avatarChooser.addEventListener('change', function () {
+    renderPreview(avatarChooser, previewAvatar);
+  });
+
+  housePhotoChooser.addEventListener('change', function () {
+    var previewImg;
+    renderNewPreviewPhoto();
+    previewImg = previewHousePhotoContainer.querySelector('.ad-form__photo img');
+    renderPreview(housePhotoChooser, previewImg);
   });
 
   onRoomFieldChange(roomsField.value);

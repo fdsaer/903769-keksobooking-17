@@ -23,7 +23,10 @@
   var mapHouseFilters = mapFilters.querySelectorAll('select');
   var mapHouseFeatures = mapFilters.querySelectorAll('input');
   var resetButton = adForm.querySelector('.ad-form__reset');
+  var previewAvatar = adForm.querySelector('.ad-form-header__preview img');
+  var previewHousePhotoContainer = adForm.querySelector('.ad-form__photo-container');
   var lastTimeout;
+  var submitButton = adForm.querySelector('.ad-form__submit');
   var mainPinTailHeight = Math.round(mainPin.offsetHeight / 2) - MAIN_PIN_HEIGHT;
   var startingPoint = {
     x: parseInt(mainPin.style.left, 10),
@@ -42,8 +45,20 @@
     }
   };
 
+  var onDocumentClick = function () {
+    closeMessage();
+  };
+
+  var onTryButtonClick = function () {
+    closeMessage();
+  };
+
   var onMessageKeyDownEvent = function (evt) {
     onEscEvent(evt, closeMessage);
+  };
+
+  var onCloseButtonClick = function () {
+    closeCard();
   };
 
   var onCardKeyDownEvent = function (evt) {
@@ -61,7 +76,7 @@
     var card = window.createCardElement(data);
     document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
     var closePopupButton = map.querySelector('.map__card .popup__close');
-    closePopupButton.addEventListener('click', closeCard);
+    closePopupButton.addEventListener('click', onCloseButtonClick);
     document.addEventListener('keydown', onCardKeyDownEvent);
   };
 
@@ -144,7 +159,7 @@
     } else {
       messageBlock = mainBlock.querySelector('.error');
     }
-    document.removeEventListener('click', closeMessage);
+    document.removeEventListener('click', onDocumentClick);
     document.removeEventListener('keydown', onMessageKeyDownEvent);
     mainBlock.removeChild(messageBlock);
   };
@@ -155,15 +170,15 @@
     var tryAgainButton = errorModule.querySelector('.error__button');
     errorModuleMessage.textContent = errorStatus;
     mainBlock.appendChild(errorModule);
-    tryAgainButton.addEventListener('click', closeMessage);
-    document.addEventListener('click', closeMessage);
+    tryAgainButton.addEventListener('click', onTryButtonClick);
+    document.addEventListener('click', onDocumentClick);
     document.addEventListener('keydown', onMessageKeyDownEvent);
   };
 
   var onUploadSuccess = function () {
     var successModule = successTemplate.cloneNode(true);
     mainBlock.appendChild(successModule);
-    document.addEventListener('click', closeMessage);
+    document.addEventListener('click', onDocumentClick);
     document.addEventListener('keydown', onMessageKeyDownEvent);
   };
 
@@ -173,6 +188,18 @@
     }
   };
 
+  var removePreviews = function () {
+    var previews = adForm.querySelectorAll('.ad-form__photo');
+    var previewImg = previews[0].querySelector('img');
+    for (var i = 1; i < previews.length; i++) {
+      previewHousePhotoContainer.removeChild(previews[i]);
+    }
+    if (previewImg) {
+      previews[0].removeChild(previewImg);
+    }
+    previewAvatar.src = 'img/muffin-grey.svg';
+  };
+
   var activatePage = function (activateValue) {
     var toDo = 'remove';
     if (!activateValue) {
@@ -180,11 +207,13 @@
       closeCard();
       deletePins();
       adForm.reset();
+      removePreviews();
       mapFilters.reset();
       window.setAddressField(startingPoint);
       mainPin.style.left = startingPoint.x + 'px';
       mainPin.style.top = startingPoint.y - mainPinTailHeight + 'px';
     } else {
+      submitButton.disabled = false;
       filterProperties = {
         housingType: mapFilters.querySelector('#housing-type').value,
         housingRooms: mapFilters.querySelector('#housing-rooms').value,
@@ -275,6 +304,8 @@
 
   adForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
+    submitButton.disabled = true;
+    submitButton.blur();
     window.workWithServer.uploadData(new FormData(adForm), onUploadSuccess, onLoadError);
   });
 
